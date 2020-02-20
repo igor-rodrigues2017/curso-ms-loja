@@ -1,0 +1,26 @@
+POST http://localhost:8080/compra
+Content-Type: application/json
+
+{
+  "itens": [
+    {
+      "id": 1,
+      "quantidade": 5
+    },
+    {
+      "id": 2,
+      "quantidade": 4
+    },
+    {
+      "id": 3,
+      "quantidade": 7
+    }
+  ],
+  "endereco": {
+    "rua": "Rua da Maria",
+    "numero": "123",
+    "estado": "GO"
+  }
+}
+
+###
