@@ -1,5 +1,6 @@
 package br.com.rodrigues.loja.controller;
 
+import br.com.rodrigues.loja.model.Compra;
 import br.com.rodrigues.loja.service.CompraService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,8 +20,8 @@ public class CompraController {
     }
 
     @PostMapping
-    public void compra(@RequestBody CompraDTO compra) {
-        service.realizaCompra(compra);
+    public Compra compra(@RequestBody CompraDTO compra) {
+        return service.realizaCompra(compra);
     }
 
 }
