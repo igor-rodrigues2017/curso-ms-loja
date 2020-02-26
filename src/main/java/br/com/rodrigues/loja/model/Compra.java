@@ -2,8 +2,15 @@ package br.com.rodrigues.loja.model;
 
 import br.com.rodrigues.loja.service.InfoPedidoDTO;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity
 public class Compra {
 
+    @Id
     private Long pedidoId;
     private Integer tempoDePreparo;
     private String enderecoDestino;
