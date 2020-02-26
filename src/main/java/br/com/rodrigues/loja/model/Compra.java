@@ -13,6 +13,10 @@ public class Compra {
         this.tempoDePreparo = pedido.getTempoDePreparo();
     }
 
+    public Compra() {
+
+    }
+
     public Long getPedidoId() {
         return pedidoId;
     }
