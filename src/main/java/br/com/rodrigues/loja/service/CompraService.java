@@ -3,6 +3,7 @@ package br.com.rodrigues.loja.service;
 import br.com.rodrigues.loja.client.FornecedorClient;
 import br.com.rodrigues.loja.controller.CompraDTO;
 import br.com.rodrigues.loja.model.Compra;
+import br.com.rodrigues.loja.repository.CompraRepository;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,15 @@ public class CompraService {
     @Autowired
     private FornecedorClient client;
 
-    @HystrixCommand(fallbackMethod = "realizaCompraFallBack")
+    @Autowired
+    private CompraRepository repository;
+
+    @HystrixCommand(threadPoolKey = "getByIdThreadPoll")
+    public Compra getById(Long id) {
+        return repository.findById(id).orElse(new Compra());
+    }
+
+    @HystrixCommand(fallbackMethod = "realizaCompraFallBack", threadPoolKey = "realizaCompraThreadPoll")
     public Compra realizaCompra(CompraDTO compra) {
         String estado = compra.getEndereco().getEstado();
 
@@ -28,11 +37,7 @@ public class CompraService {
         InfoPedidoDTO pedido = client.realizaPedido(compra.getItens());
         Compra compraRealizada = new Compra(pedido);
         compraRealizada.setEnderecoDestino(fornecedorDTO.getEndereco());
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        repository.save(compraRealizada);
         return compraRealizada;
     }
 
@@ -42,4 +47,5 @@ public class CompraService {
         compraFallBack.setEnderecoDestino("endereço do fallback poderia ser melhor");
         return compraFallBack;
     }
+
 }
