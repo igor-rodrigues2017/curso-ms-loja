@@ -1,11 +1,13 @@
 package br.com.rodrigues.loja.model;
 
 import br.com.rodrigues.loja.service.InfoPedidoDTO;
+import br.com.rodrigues.loja.service.VoucherDTO;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.time.LocalDate;
 
 @Entity
 public class Compra {
@@ -14,6 +16,8 @@ public class Compra {
     private Long pedidoId;
     private Integer tempoDePreparo;
     private String enderecoDestino;
+    private LocalDate dataParaEntrega;
+    private Long voucherId;
 
     public Compra(InfoPedidoDTO pedido) {
         this.pedidoId = pedido.getId();
@@ -46,5 +50,21 @@ public class Compra {
 
     public void setEnderecoDestino(String enderecoDestino) {
         this.enderecoDestino = enderecoDestino;
+    }
+
+    public LocalDate getDataParaEntrega() {
+        return dataParaEntrega;
+    }
+
+    public void setDataParaEntrega(LocalDate dataParaEntrega) {
+        this.dataParaEntrega = dataParaEntrega;
+    }
+
+    public Long getVoucherId() {
+        return voucherId;
+    }
+
+    public void setVoucherId(Long voucherId) {
+        this.voucherId = voucherId;
     }
 }

@@ -1,5 +1,6 @@
 package br.com.rodrigues.loja.service;
 
+import br.com.rodrigues.loja.client.TransportadorClient;
 import br.com.rodrigues.loja.client.FornecedorClient;
 import br.com.rodrigues.loja.controller.CompraDTO;
 import br.com.rodrigues.loja.model.Compra;
@@ -10,16 +11,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 @Service
 public class CompraService {
 
     private static final Logger log = LoggerFactory.getLogger(CompraService.class);
 
-    @Autowired
-    private FornecedorClient client;
+    private final FornecedorClient fornecedorClient;
+
+    private final TransportadorClient transportadorClient;
+
+    private final CompraRepository repository;
 
     @Autowired
-    private CompraRepository repository;
+    public CompraService(FornecedorClient fornecedorClient, TransportadorClient transportadorClient, CompraRepository repository) {
+        this.fornecedorClient = fornecedorClient;
+        this.transportadorClient = transportadorClient;
+        this.repository = repository;
+    }
 
     @HystrixCommand(threadPoolKey = "getByIdThreadPoll")
     public Compra getById(Long id) {
@@ -31,13 +41,24 @@ public class CompraService {
         String estado = compra.getEndereco().getEstado();
 
         log.info("Buscando informações do forncedor no estado {}", estado);
-        InfoFornecedorDTO fornecedorDTO = client.getInfoPorEstado(estado);
+        InfoFornecedorDTO fornecedorDTO = fornecedorClient.getInfoPorEstado(estado);
 
         log.info("Realizando um pedido");
-        InfoPedidoDTO pedido = client.realizaPedido(compra.getItens());
+        InfoPedidoDTO pedido = fornecedorClient.realizaPedido(compra.getItens());
+
+        EntregaDTO entrega = new EntregaDTO();
+        entrega.setDataParaEntrega(LocalDate.now().plusDays(pedido.getTempoDePreparo()));
+        entrega.setEnderecoDestino(compra.getEndereco().toString());
+        entrega.setEnderecoOrigem(fornecedorDTO.getEndereco());
+        entrega.setPedidoId(pedido.getId());
+        VoucherDTO voucher = transportadorClient.reservaEntrega(entrega);
+
         Compra compraRealizada = new Compra(pedido);
         compraRealizada.setEnderecoDestino(fornecedorDTO.getEndereco());
+        compraRealizada.setVoucherId(voucher.getNumero());
+        compraRealizada.setDataParaEntrega(voucher.getPrevisaoParaEntrega());
         repository.save(compraRealizada);
+
         return compraRealizada;
     }
 
